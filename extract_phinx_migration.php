@@ -153,6 +153,8 @@ function getPhinxColumnType($columndata)
             return 'text';
         case 'varchar':
             return 'string';
+        case 'decimal':
+            return 'decimal';
         default:
             return '[' . $type . ']';
     }
@@ -198,6 +200,15 @@ function getPhinxColumnAttibutes($phinxtype, $columndata)
             break;
         case 'longtext':
             $limit = 'MysqlAdapter::TEXT_LONG';
+            break;
+        case 'decimal':
+            $pattern = '/decimal\((\d+),(\d+)\)$/';
+            if ( preg_match($pattern, $columndata['Type'], $match) ) {
+                $precision = $match[1];
+                $scale = $match[2];
+                $attributes[] = "'precision' => {$precision}";
+                $attributes[] = "'scale' => {$scale}";
+            }
             break;
         default:
             $pattern = '/\((\d+)\)$/';
