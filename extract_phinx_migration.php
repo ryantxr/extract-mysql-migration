@@ -125,6 +125,10 @@ function getForeignKeysMigrations($foreign_keys, $indent)
 function getMySQLColumnType($columndata)
 {
     $type = $columndata['Type'];
+    // Recognize tinyint(1) unsigned as boolean
+    if ( $type == 'tinyint(1) unsigned' ) {
+        return 'boolean';
+    } 
     $pattern = '/^[a-z]+/';
     preg_match($pattern, $type, $match);
     return $match[0];
@@ -133,6 +137,8 @@ function getPhinxColumnType($columndata)
 {
     $type = getMySQLColumnType($columndata);
     switch($type) {
+        case 'boolean':
+            return 'boolean';
         case 'tinyint':
         case 'smallint':
         case 'int':
@@ -180,6 +186,9 @@ function getPhinxColumnAttibutes($phinxtype, $columndata)
     // limit / length
     $limit = 0;
     switch (getMySQLColumnType($columndata)) {
+        case 'boolean':
+            //tinyint(1) unsigned
+            break;
         case 'tinyint':
             $limit = 'MysqlAdapter::INT_TINY';
             break;
